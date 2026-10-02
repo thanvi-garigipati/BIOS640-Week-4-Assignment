@@ -1,0 +1,221 @@
+---
+title: "Week3_Assignment_TG"
+author: Thanvi Garigipati
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+theme: united
+highlight: zenburn
+date: "2026-10-04"
+---
+
+```{r import_data, include=FALSE}
+pacman::p_load(rio, ggplot2, here, cowplot, ggpubr, dpylr, DT)
+nhanes_cleaned_data <- import("cleaned_NHANES copy.csv") 
+```
+
+# Exercise 1: Reproducing and arranging ggplot2 figures {.tabset}
+
+Using the `names()` function we can determine the names of the variables in the data set. This will allow us to know what names to use for our histogram
+
+```{r names_nhanes_data, echo=FALSE, results='hide'}
+names(nhanes_cleaned_data)
+```
+
+Based on the output: `RIAGENDR` has been renamed to `Gender` `RIDRETH3` has been renamed to `ethnicity_2` `RIDAGEYR` has been renamed to `age`
+
+## Recreating the histogram using updated names
+
+```{r histogram_nhanes_data, echo=FALSE, fig.align='left'}
+nhanes_histogram <- ggplot(nhanes_cleaned_data, aes(x = age, fill = gender)) +
+geom_histogram(binwidth = 5, position = "dodge") +
+labs(title = "Age Distribution of Participants in NHANES Study by Gender", x = "Age (years)", y = "Number of Participants", fill = "Gender")
+
+nhanes_histogram
+```
+
+## Recreating grouped bar chart using updated names
+
+Since the NHANES data set is not already aggregated, I used the `geom_bar()` function over the `geom_col()` function.
+
+```{r bar_chart_nhanes_data, echo=FALSE, fig.align='left'}
+nhanes_bar_chart <- ggplot(nhanes_cleaned_data, aes(x = ethnicity_2, fill = gender)) + geom_bar(position = "stack") + labs(title = "Ethnicity of NHANES participants grouped by Gender", x = "Ethnicity of Participants", y = "Number of Participants", fill = "Gender")
+
+nhanes_bar_chart
+```
+
+## Combining histogram and bar chart
+
+Using the `plot_grid` function under the `cowplot` package the following figure is the output:
+
+```{r combined_chart_cowplot_nhanes_data, echo=FALSE, fig.align='left'}
+combined_nhanes_plot_cowplot <- plot_grid(nhanes_bar_chart, nhanes_histogram)
+
+combined_nhanes_plot_cowplot
+```
+
+Using the `ggarrange` function the following figure is the output:
+
+```{r combined_chart_ggarrange_nhanes_data, echo=FALSE, fig.align='left'}
+combined_nhanes_plot_ggarrange <- ggarrange(nhanes_bar_chart, nhanes_histogram, ncol = 1, nrow = 2, common.legend = TRUE, legend = "right")
+
+combined_nhanes_plot_ggarrange
+```
+
+## Comparing the figures provided by the `ggarrange` and `plot_grid` functions:
+
+Using the `ggarrange`() function allows you to configure and present your plots in a more organized fashion. For example, as seen in the figure created by `ggarrange()`, this function allows you to create one legend instead of having the same legend twice. Additionally, `ggarrange()` function allows you to decide placement of your figures, as seen I chose to have them vertical instead of next to each other horizontally.
+
+#NHANES data set cleaned 
+
+```{r nhanes_dataset_interactive_table, echo=TRUE}
+datatable(nhanes_cleaned_data, options = list(scrollX = TRUE, searching = TRUE))
+```
+
+# Exercise 2: Visualizing key characteristics in the NHANES data set
+
+## Creating figures to represent `Age`
+
+Age is represented in two ways in the NHANES cleaned data set; one as numerical and one as a categorical variable.
+
+### Histogram and density plot to represent `Age`
+
+Considering the continuous numerical variable `Age`, a histogram and density plot is the most appropriate figure. The histogram will allow you to identify which ages participated in the study more, and the density plot allows you to see if the age is skewed in a certain direction, the peak, and the overall spread of the data.
+
+```{r nhanes_age_histogram, echo=FALSE, fig.align='left'}
+nhanes_age_histogram_density <- ggplot(nhanes_cleaned_data, aes(x = age, y = after_stat(count))) + geom_histogram(fill = "steelblue", colour = "darkblue", binwidth = 5) + geom_density(aes(y = after_stat(density) * nrow(nhanes_cleaned_data) * 5), colour = "green", alpha = 0.5) + labs(title = "Distribution of Age of NHANES participants", x = "Age of Participants", y = "Number of Participants")
+
+nhanes_age_histogram_density
+```
+
+To create an appropriate figure to represent the age distribution, I represent y-axis as the number of participants, I used `geom_density` to show the general skew and peak. Based on the figure produced, most partipants are younger than 20.
+
+### Bar chart to represent `Age`
+
+A bar chart for the categorized age groups is most appropriate as it can allow you to compare the different age groups easier.
+
+```{r nhanes_age_bar_chart, echo=FALSE, fig.align='left'}
+nhanes_age_cat_bar_chart <- ggplot(nhanes_cleaned_data, aes(x = age_cat)) + geom_bar(fill = "steelblue", width = 0.5) + labs(title = "Number of Participants based on Age Category", x = "Age Category of Participants", y = "Number of Participants")
+
+nhanes_age_cat_bar_chart
+```
+
+## Creating a bar chart to represent gender
+
+A bar chart is the most appropriate for representing the Gender variable as it a categorical variable.
+
+```{r nhanes_gender_bar_chart, echo=FALSE, fig.align='left'}
+nhanes_gender_bar_chart <- ggplot(nhanes_cleaned_data, aes(x = gender, fill = gender)) + geom_bar(width = 0.5) + scale_fill_manual(values = c("Female" = "pink", "Male" = "blue")) + labs(title = "Number of Participants based on Gender", x = "Gender of Participants", y = "Number of Participants") + theme(legend.position = "none")
+
+nhanes_gender_bar_chart 
+```
+
+## Creating a bar chart to represent ethnicity
+
+A bar chart is the most appropriate for representing the Ethnicity variables because it is categorical data making it easier to compare the number of participants in each distinct ethnicity.
+
+### Bar chart using `Ethnicity_1` variable
+
+```{r bar_chart_ethnicity_1_nhanes_data, echo=FALSE, fig.align='left'}
+nhanes_ethnicity_1_bar_chart <- ggplot(nhanes_cleaned_data, aes(x = ethnicity_1, fill = ethnicity_1)) + geom_bar(fill = "forestgreen", width = 0.5) + labs(title = "Distribution of Ethnicity of NHANES participants", x = "Ethnicity of Participants", y = "Number of Participants") + theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+nhanes_ethnicity_1_bar_chart
+```
+
+### Bar chart using `Ethnicity_2` variable
+
+```{r bar_chart_ethnicty_2_nhanes_data, echo=FALSE, fig.align='left'}
+nhanes_ethnicity_2_bar_chart <- ggplot(nhanes_cleaned_data, aes(fill = ethnicity_2, x= factor(ethnicity_2, levels = c("Black", "Mexican", "Other", "Other Hispanic", "White", "Asian")))) + geom_bar(fill = "forestgreen", width = 0.5) + labs(title = "Distribution of Ethnicity of NHANES participants", x = "Ethnicity of Participants", y = "Number of Participants") + theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+nhanes_ethnicity_2_bar_chart
+```
+
+Using the `levels()` function I moved the `Asian` category to the left hand side so it is easier to compare the figures.
+
+### Comparing the two ethnicity variables
+
+Using the `ggarrange` function allows you to compare the two charts side by side.
+
+```{r bar_chart_ethnicty_ggarrange_nhanes_data, echo=FALSE, fig.align='left'}
+combined_ehtnicity_chart_nhanes <- ggarrange(nhanes_ethnicity_1_bar_chart, nhanes_ethnicity_2_bar_chart)
+
+combined_ehtnicity_chart_nhanes
+```
+
+Based on this figure, The bar chart created using the data from `ethnicity_2` variable is more appropriate and should be chosen to keep. This is because it divides the participants into more specific categories, aka it includes `Asian` as an ethnicity instead of it all being in `Other` or `Other Hispanic`.
+
+```{r ggsave_figures_data, include=FALSE}
+ggsave("figures/nhanes_age_histogram_density.png", nhanes_age_histogram_density)
+ggsave("figures/nhanes_age_cat_bar_chart.png", nhanes_age_cat_bar_chart)
+ggsave("figures/nhanes_ethnicity_1_bar_chart.png", nhanes_ethnicity_1_bar_chart)
+ggsave("figures/nhanes_ethnicity_2_bar_chart.png", nhanes_ethnicity_2_bar_chart)
+ggsave("figures/nhanes_gender_bar_chart.png", nhanes_gender_bar_chart)
+```
+
+# Exercise 4: Exploring relationships through visualization
+
+To calculate the average of systolic blood pressure for each participant, the function `rowMeans()` was used. Specifically, it was used to be able to calculate the mean of each participant and their average systolic reading.
+
+```{r nhanes_avg_sbp, echo=FALSE, results='hide'}
+nhanes_cleaned_data <- nhanes_cleaned_data %>% mutate(average_systolic_bp = rowMeans(cbind(systolic_bp_1, systolic_bp_2, systolic_bp_3, systolic_bp_4), na.rm = TRUE))
+```
+
+To then delete participants who had missing values for all systolic readings the `complete.cases()` function. This allows for a better picture of the data set.
+
+```{r nhanes_cleaned_avg_sbp, echo=FALSE, results='hide'}
+nhanes_cleaned_final <- nhanes_cleaned_data %>% dplyr::filter(complete.cases(age, gender, average_systolic_bp))
+```
+
+After filtering the data set for missing values, to be able to visualize the distribution of participants based on their average systolic readings, categories were created using the `cut()` function. Categories were divided as "Normal" - 0-120 "Elevated" - 120-130 "Stage 1 hypertension" - 130-140 "Stage 2 hypertension" - 140-250
+
+```{r nhanes_final_avg_sbp, echo=FALSE, results='hide'}
+nhanes_cleaned_final <- nhanes_cleaned_final %>% mutate(systolic_bp_cat = cut(average_systolic_bp, breaks = c(0, 120, 130, 140, 250), labels = c("Normal","Elevated","Stage 1 hypertension","Stage 2 hypertension")))
+```
+
+To actually visualize the new data final data set, figures were created to understand the distribution of participants based on their age, gender, their systolic blood pressure category.
+
+## Representing Final Systolic Blood Pressure Data
+
+Using the `geom_bar()` I used a bar chart to represent the final systolic blood pressure categories of participants.
+
+```{r bar_chart_final_systolic_bp, echo=FALSE, fig.align='left'}
+nhanes_systolic_bp_bar_chart <- ggplot(nhanes_cleaned_final, aes(x = systolic_bp_cat)) + geom_bar(fill = "forestgreen", width = 0.5) + labs(title = "Distribution of Participants based on Systolic Blood Pressure Categories", x = "Systolic Blood Pressure Category", y = "Number of Participants") + theme(legend.position = "none")
+
+nhanes_systolic_bp_bar_chart
+```
+
+Based on this graph the majority of participants have normal systolic blood pressure. It is interesting to note, more people have stage 2 hypertension than stage 1.
+
+## Representing Gender Distribution in Final data set
+
+```{r nhanes_final_gender_bar_chart, echo=FALSE, fig.align='left'}
+nhanes_final_gender_bar_chart <- ggplot(nhanes_cleaned_final, aes(x = gender, fill = gender)) + geom_bar(width = 0.5) + scale_fill_manual(values = c("Female" = "pink", "Male" = "blue")) + labs(title = "Number of Participants based on Gender", x = "Gender of Participants", y = "Number of Participants") + theme(legend.position = "none")
+
+nhanes_final_gender_bar_chart 
+```
+
+Based on this distribution, there a marginally more females than males that participated in this study.
+
+## Representing Final Distrubution of Age of Participants
+
+```{r nhanes_age_final_histogram, echo=FALSE, fig.align='left'}
+nhanes_age_final_histogram_density <- ggplot(nhanes_cleaned_final, aes(x = age, y = after_stat(count))) + geom_histogram(fill = "steelblue", colour = "darkblue", binwidth = 5) + geom_density(aes(y = after_stat(density) * nrow(nhanes_cleaned_data) * 5), colour = "green", alpha = 0.5) + labs(title = "Distribution of Age of NHANES participants", x = "Age of Participants", y = "Number of Participants")
+
+nhanes_age_final_histogram_density
+```
+
+```{r nhanes_age_final_cat_bar_chart, echo=FALSE, fig.align='left'}
+nhanes_age_final_cat_bar_chart <- ggplot(nhanes_cleaned_final, aes(x = age_cat)) + geom_bar(fill = "steelblue", width = 0.5) + labs(title = "Number of Participants based on Age Category", x = "Age Category of Participants", y = "Number of Participants")
+
+nhanes_age_final_cat_bar_chart
+```
+
+Step 5
+
+```{r nhanes_final_sbp_across_age_gender, echo=FALSE, fig.align='left', fig.width=7, fig.height=6}
+final_figure_sbp_across_age_gender <- ggplot(nhanes_cleaned_final, aes(x = age_cat, fill = systolic_bp_cat)) + geom_bar() + facet_grid(systolic_bp_cat ~ gender) + scale_fill_brewer(palette = "Set2") + labs(title = "Difference in Systolic Blood Pressure Categories based on Age and Gender", x = "Age Category", y = "Number of Participants", fill = "Systolic BP Category") + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+final_figure_sbp_across_age_gender
+```
