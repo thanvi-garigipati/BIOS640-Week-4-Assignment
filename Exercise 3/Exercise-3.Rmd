@@ -1,0 +1,35 @@
+---
+title: "NHANES Dashboard"
+author: "Thanvi Garigipati"
+date: "2026-10-024"
+output: 
+  flexdashboard::flex_dashboard
+  orientation: rows 
+---
+
+```{r setup, include=FALSE}
+pacman:: p_load(rio, tidyverse, here, flexdashboard)
+
+nhanes_cleaned_dataset <- import("cleaned_NHANES copy.csv")
+```
+
+Row {data-height=650}
+--------------------------------
+
+### Section A
+
+```{r}
+```
+
+Row {data-height=350}
+---------------------------------
+
+### Section B
+
+```{r}
+```
+
+### Section C
+
+```{r}
+```
