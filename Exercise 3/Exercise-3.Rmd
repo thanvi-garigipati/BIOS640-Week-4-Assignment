@@ -1,10 +1,10 @@
 ---
 title: "NHANES Dashboard"
 author: "Thanvi Garigipati"
-date: "2026-10-024"
+date: "2026-10-04"
 output: 
-  flexdashboard::flex_dashboard
-  orientation: rows 
+  flexdashboard::flex_dashboard:
+    orientation: rows 
 ---
 
 ```{r setup, include=FALSE}
@@ -18,18 +18,23 @@ Row {data-height=650}
 
 ### Section A
 
-```{r}
+```{r figure visualisation, fig.width=10, fig.height=7}
 ```
 
 Row {data-height=350}
 ---------------------------------
 
-### Section B
+### Section B 
 
 ```{r}
+library(flexdashboard)
+
+gauge(42, min = 0, max = 100, symbol = "%", gaugeSectors(success = c(70, 100), warning = c(40, 70), danger = c(0, 40)))
 ```
 
 ### Section C
 
-```{r}
+```{r presenting valuebox}
+valueBox("value %", caption = "Percentage of individuals with
+an average systolic blood pressure above 120 mm Hg.", icon = NULL, color = "orange")
 ```

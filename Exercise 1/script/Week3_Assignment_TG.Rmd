@@ -238,4 +238,8 @@ Step 5
 final_figure_sbp_across_age_gender <- ggplot(nhanes_cleaned_final, aes(x = age_cat, fill = systolic_bp_cat)) + geom_bar() + facet_grid(systolic_bp_cat ~ gender) + scale_fill_brewer(palette = "Set2") + labs(title = "Difference in Systolic Blood Pressure Categories based on Age and Gender", x = "Age Category", y = "Number of Participants", fill = "Systolic BP Category") + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 final_figure_sbp_across_age_gender
+
+ggsave("figures/final_figure_sbp_across_age_gender.png", final_figure_sbp_across_age_gender)
+
+```
 ```
