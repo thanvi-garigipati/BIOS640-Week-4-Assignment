@@ -19,6 +19,7 @@ Row {data-height=650}
 ### Section A
 
 ```{r figure visualisation, fig.width=10, fig.height=7}
+
 ```
 
 Row {data-height=350}
