@@ -12,17 +12,17 @@ here()
 cleaned_NHANES_data <- import("cleaned_NHANES _exercise4.csv")
 ```
 
-The NHANES dataset is collected by the CDC and is a survey that assesses a participants (all ages) health and nutrition. This report focuses on the demographics of the data including Age, Gender, and Ethnicity and their relationship with Systolic Blood Pressure readings. 
+The NHANES data set is collected by the CDC and is a survey that assesses a participants (all ages) health and nutrition. This report focuses on the demographics of the data including Age, Gender, and Ethnicity and their relationship with Systolic Blood Pressure readings.
 
-### Preparing NHANES table 
+### NHANES Tables
 
-```{r sample size based on wave, echo=FALSE}
+```{r sample size based on wave, include=FALSE}
 nhanes_sample_size_based_wave <- table(cleaned_NHANES_data$wave_id)
 
 nhanes_sample_size_based_wave
 ```
 
-```{r distribution of gender in each wave, echo=FALSE}
+```{r distribution of gender in each wave, include=FALSE}
 nhanes_gender_distribution_based_wave <- table(cleaned_NHANES_data$wave_id, cleaned_NHANES_data$gender) 
 
 nhanes_gender_distribution_based_wave 
@@ -37,14 +37,16 @@ summarise("Sample size" = n(), "Males (n)" = sum(gender == "Male", na.rm = TRUE)
 full_table_gender$"Male (%)" <- round(gender_percents[, "Male"], 1)
 
 full_table_gender
+```
 
+```{r creating table distribution of gender in each wave, echo=FALSE}
 gender_final_table <- kable(full_table_gender, format = "latex", booktabs = TRUE,
-col.names = c("Wave", "Total Sample size (n)", "Male (n)", "Male (%)"), digits = 1) %>% add_header_above(c(" " = 1, "Number of Male Particpants in NHANES Survey" = 3)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE) %>% footnote(general = "Male (%) represents the percentage of males within each wave.")
+col.names = c("Wave", "Total Sample size (n)", "Male (n)", "Male (%)"), digits = 1) %>% add_header_above(c(" " = 1, "Number of Male Particpants in NHANES Survey in each Wave" = 3)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE)
 
 gender_final_table
 ```
 
-```{r distribution of ethnicity in each wave, echo=FALSE}
+```{r distribution of ethnicity in each wave, include=FALSE}
 nhanes_ethnicity_distribution_based_wave <- table(cleaned_NHANES_data$wave_id, cleaned_NHANES_data$ethnicity_2) 
 
 nhanes_ethnicity_distribution_based_wave 
@@ -55,15 +57,21 @@ ethnicity_percents <- prop.table(nhanes_ethnicity_distribution_based_wave, margi
 
 ethnicity_percents
 
-full_table_ethnicity <- cleaned_NHANES_data %>% group_by (wave_id) %>%
-summarise("Ethnicity (n)" = n())
-
-full_table_ethnicity$"Percentage of Sample Size" <- round(ethnicity_percents[,])
+full_table_ethnicity <- cleaned_NHANES_data %>% group_by(wave_id, ethnicity_2) %>% summarise("Ethnicity_n" = n()) %>% group_by(wave_id) %>% mutate("Ethnicity (%)" = round(Ethnicity_n/ sum(as.numeric(Ethnicity_n)) * 100, 1))
 
 full_table_ethnicity
 ```
 
-```{r summary statistics, echo=FALSE}
+```{r creating ethnicity table, echo=FALSE}
+
+ethnicity_final_table <- kable(full_table_ethnicity,format = "latex",
+booktabs = TRUE, col.names = c("Wave", "Ethnicity", "Ethnicity (n)", "Ethnicity (%)"), digits = 1) %>% add_header_above(c(" " = 1, "Ethnicity Distribution in NHANES Survey in each Wave" = 3)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE)
+
+ethnicity_final_table
+
+```
+
+```{r summary statistics, include=FALSE}
 
 cleaned_NHANES_data$average_systolic_bp <- rowMeans(cleaned_NHANES_data[, c("systolic_bp_1", "systolic_bp_2", "systolic_bp_3", "systolic_bp_4")], na.rm = TRUE)
 
@@ -71,9 +79,11 @@ sbp_summary_by_waveid <- cleaned_NHANES_data %>% group_by(wave_id) %>%
 summarise("Minimum" = min(average_systolic_bp, na.rm = TRUE), "Maximum" = max(average_systolic_bp, na.rm = TRUE), "Median" = median(average_systolic_bp, na.rm = TRUE), "Mean" = mean(average_systolic_bp, na.rm = TRUE), "Standard deviation" = sd(average_systolic_bp, na.rm = TRUE))
 
 sbp_summary_by_waveid
+```
 
+```{r creating table with summary statistics, echo=FALSE}
 sbp_summary_final_table <- kable(sbp_summary_by_waveid, format = "latex",
-booktabs = TRUE, col.names = c("Wave", "Minimum SBP", "Maximum SBP", "Median SBP", "Mean SBP", "Standard deviation")) %>% add_header_above(c(" " = 1, "Average systolic blood pressure (mmHg)" = 5)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE) %>% footnote(general = "Values are reported in mmHg. SBP stands for systolic blood pressure reading. Summary statistics are based on the average of the four systolic blood pressure readings.")
+booktabs = TRUE, col.names = c("Wave", "Minimum SBP", "Maximum SBP", "Median SBP", "Mean SBP", "Standard deviation")) %>% add_header_above(c(" " = 1, "Average systolic blood pressure (mmHg)" = 5)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE)
 
 sbp_summary_final_table
 ```
