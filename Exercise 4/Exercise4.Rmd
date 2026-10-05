@@ -1,0 +1,57 @@
+---
+title: "Exercise 4"
+author: Thanvi Garigipati 
+output: pdf_document
+---
+
+```{r }
+pacman::p_load(rio,here, tidyverse, dpylr)
+
+here()
+
+cleaned_NHANES_data <- import("cleaned_NHANES _exercise4.csv")
+```
+
+The NHANES dataset is collected by the CDC and is a survey that assesses a participants (all ages) health and nutrition. This report focuses on the demographics of the data including Age, Gender, and Ethnicity and their relationship with Systolic Blood Pressure readings. 
+
+### Preparing NHANES table 
+
+```{r sample size based on wave, }
+nhanes_sample_size_based_wave <- table(cleaned_NHANES_data$wave_id)
+
+nhanes_sample_size_based_wave
+```
+
+```{r distribution of gender in each wave, }
+nhanes_gender_distribution_based_wave <- table(cleaned_NHANES_data$gender,cleaned_NHANES_data$wave_id) 
+
+nhanes_gender_distribution_based_wave 
+
+gender_percents <- prop.table(nhanes_gender_distribution_based_wave, margin = 1) * 100
+
+gender_percents
+
+full_table_gender <- as.data.frame(cbind(
+  `Sample size` = rowSums(nhanes_gender_distribution_based_wave),
+  `Males n (%)` = round(gender_percents[, "Male"], 1)))
+
+full_table_gender
+```
+
+```{r distribution of ethnicity in each wave, }
+nhanes_ethnicity_distribution_based_wave <- table(cleaned_NHANES_data$ethnicity_2,cleaned_NHANES_data$wave_id) 
+
+nhanes_ethnicity_distribution_based_wave 
+
+ethnicity_percents <- prop.table(nhanes_ethnicity_distribution_based_wave, margin = 1) * 100
+
+ethnicity_percents
+
+ethnicity_table <- as.data.frame(cbind(n, 2015 = round))
+```
+
+```{r summary statistics, }
+
+
+
+```
