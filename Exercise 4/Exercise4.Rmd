@@ -4,8 +4,8 @@ author: Thanvi Garigipati
 output: pdf_document
 ---
 
-```{r }
-pacman::p_load(rio,here, tidyverse, dpylr)
+```{r, include=FALSE}
+pacman::p_load(rio,here, tidyverse, dpylr, knitr, kableExtra)
 
 here()
 
@@ -16,14 +16,14 @@ The NHANES dataset is collected by the CDC and is a survey that assesses a parti
 
 ### Preparing NHANES table 
 
-```{r sample size based on wave, }
+```{r sample size based on wave, echo=FALSE}
 nhanes_sample_size_based_wave <- table(cleaned_NHANES_data$wave_id)
 
 nhanes_sample_size_based_wave
 ```
 
-```{r distribution of gender in each wave, }
-nhanes_gender_distribution_based_wave <- table(cleaned_NHANES_data$gender,cleaned_NHANES_data$wave_id) 
+```{r distribution of gender in each wave, echo=FALSE}
+nhanes_gender_distribution_based_wave <- table(cleaned_NHANES_data$wave_id, cleaned_NHANES_data$gender) 
 
 nhanes_gender_distribution_based_wave 
 
@@ -31,27 +31,49 @@ gender_percents <- prop.table(nhanes_gender_distribution_based_wave, margin = 1)
 
 gender_percents
 
-full_table_gender <- as.data.frame(cbind(
-  `Sample size` = rowSums(nhanes_gender_distribution_based_wave),
-  `Males n (%)` = round(gender_percents[, "Male"], 1)))
+full_table_gender <- cleaned_NHANES_data %>% group_by(wave_id) %>%
+summarise("Sample size" = n(), "Males (n)" = sum(gender == "Male", na.rm = TRUE))
+
+full_table_gender$"Male (%)" <- round(gender_percents[, "Male"], 1)
 
 full_table_gender
+
+gender_final_table <- kable(full_table_gender, format = "latex", booktabs = TRUE,
+col.names = c("Wave", "Total Sample size (n)", "Male (n)", "Male (%)"), digits = 1) %>% add_header_above(c(" " = 1, "Number of Male Particpants in NHANES Survey" = 3)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE) %>% footnote(general = "Male (%) represents the percentage of males within each wave.")
+
+gender_final_table
 ```
 
-```{r distribution of ethnicity in each wave, }
-nhanes_ethnicity_distribution_based_wave <- table(cleaned_NHANES_data$ethnicity_2,cleaned_NHANES_data$wave_id) 
+```{r distribution of ethnicity in each wave, echo=FALSE}
+nhanes_ethnicity_distribution_based_wave <- table(cleaned_NHANES_data$wave_id, cleaned_NHANES_data$ethnicity_2) 
 
 nhanes_ethnicity_distribution_based_wave 
+
+n <- rowSums(nhanes_ethnicity_distribution_based_wave)
 
 ethnicity_percents <- prop.table(nhanes_ethnicity_distribution_based_wave, margin = 1) * 100
 
 ethnicity_percents
 
-ethnicity_table <- as.data.frame(cbind(n, 2015 = round))
+full_table_ethnicity <- cleaned_NHANES_data %>% group_by (wave_id) %>%
+summarise("Ethnicity (n)" = n())
+
+full_table_ethnicity$"Percentage of Sample Size" <- round(ethnicity_percents[,])
+
+full_table_ethnicity
 ```
 
-```{r summary statistics, }
+```{r summary statistics, echo=FALSE}
 
+cleaned_NHANES_data$average_systolic_bp <- rowMeans(cleaned_NHANES_data[, c("systolic_bp_1", "systolic_bp_2", "systolic_bp_3", "systolic_bp_4")], na.rm = TRUE)
 
+sbp_summary_by_waveid <- cleaned_NHANES_data %>% group_by(wave_id) %>%
+summarise("Minimum" = min(average_systolic_bp, na.rm = TRUE), "Maximum" = max(average_systolic_bp, na.rm = TRUE), "Median" = median(average_systolic_bp, na.rm = TRUE), "Mean" = mean(average_systolic_bp, na.rm = TRUE), "Standard deviation" = sd(average_systolic_bp, na.rm = TRUE))
 
+sbp_summary_by_waveid
+
+sbp_summary_final_table <- kable(sbp_summary_by_waveid, format = "latex",
+booktabs = TRUE, col.names = c("Wave", "Minimum SBP", "Maximum SBP", "Median SBP", "Mean SBP", "Standard deviation")) %>% add_header_above(c(" " = 1, "Average systolic blood pressure (mmHg)" = 5)) %>% column_spec(1, bold = TRUE) %>% row_spec(0, bold = TRUE) %>% footnote(general = "Values are reported in mmHg. SBP stands for systolic blood pressure reading. Summary statistics are based on the average of the four systolic blood pressure readings.")
+
+sbp_summary_final_table
 ```
